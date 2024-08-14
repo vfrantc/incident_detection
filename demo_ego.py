@@ -92,21 +92,29 @@ def process_video(input_file, output_file, frame_jump=20):
         if len(sliding_window) == 45:
             frames = torch.cat(sliding_window).unsqueeze(0).cuda()
             with torch.no_grad():
-                #outputs1 = model1(frames)
-                outputs2 = model2(frames)
+                outputs1 = model1(frames)
+                #outputs2 = model2(frames)
                 #avg_prob = (torch.softmax(outputs1, dim=1)[:, 1] + torch.softmax(outputs2, dim=1)[:, 1]) / 2
-                avg_prob = torch.softmax(outputs2, dim=1)[:, 1]
+                avg_prob = torch.softmax(outputs1, dim=1)[:, 1]
                 probabilities.append(avg_prob.cpu().numpy())
 
     cap.release()
 
     probabilities = np.concatenate(probabilities)
-    probabilities = np.pad(probabilities, (num_frames - len(probabilities), 0), mode='constant')
 
-    #mapped_probabilities = [custom_mapping(x) for x in probabilities]
+    # Calculate half the padding
+    total_padding = num_frames - len(probabilities)
+    half_padding = total_padding // 2
+
+    # Pad half before and half after
+    probabilities = np.pad(probabilities, (half_padding, total_padding - half_padding), mode='constant')
+
+    # Use the custom mapping function for probabilities if needed
     mapped_probabilities = [x for x in probabilities]
+
     cap = cv2.VideoCapture(input_file)
     prob_idx = 0
+
 
     while cap.isOpened():
         ret, frame = cap.read()
