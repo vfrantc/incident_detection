@@ -100,7 +100,7 @@ def process_video(input_file, output_file, frame_jump=20):
     cap.release()
 
     probabilities = np.concatenate(probabilities)
-    probabilities = np.pad(probabilities, (0, num_frames - len(probabilities)), mode='constant')
+    probabilities = np.pad(probabilities, (num_frames - len(probabilities), 0), mode='constant')
 
     #mapped_probabilities = [custom_mapping(x) for x in probabilities]
     mapped_probabilities = [x for x in probabilities]
