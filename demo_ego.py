@@ -8,6 +8,8 @@ from model import VideoClassifier
 from PIL import Image
 from argparse import ArgumentParser
 from tqdm import tqdm
+from scipy.signal import medfilt  # Import median filter
+
 
 def custom_mapping(x):
     if x <= 0.79:
@@ -93,9 +95,9 @@ def process_video(input_file, output_file, frame_jump=20):
             frames = torch.cat(sliding_window).unsqueeze(0).cuda()
             with torch.no_grad():
                 outputs1 = model1(frames)
-                #outputs2 = model2(frames)
-                #avg_prob = (torch.softmax(outputs1, dim=1)[:, 1] + torch.softmax(outputs2, dim=1)[:, 1]) / 2
-                avg_prob = torch.softmax(outputs1, dim=1)[:, 1]
+                outputs2 = model2(frames)
+                avg_prob = (torch.softmax(outputs1, dim=1)[:, 1] + torch.softmax(outputs2, dim=1)[:, 1]) / 2
+                #avg_prob = torch.softmax(outputs1, dim=1)[:, 1]
                 probabilities.append(avg_prob.cpu().numpy())
 
     cap.release()
@@ -108,6 +110,8 @@ def process_video(input_file, output_file, frame_jump=20):
 
     # Pad half before and half after
     probabilities = np.pad(probabilities, (half_padding, total_padding - half_padding), mode='constant')
+    probabilities = medfilt(probabilities, kernel_size=7)
+
 
     # Use the custom mapping function for probabilities if needed
     mapped_probabilities = [x for x in probabilities]
