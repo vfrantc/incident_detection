@@ -7,6 +7,7 @@ from torchvision import transforms
 from model import VideoClassifier
 from PIL import Image
 from argparse import ArgumentParser
+from tqdm import tqdm
 
 def custom_mapping(x):
     if x <= 0.79:
@@ -131,7 +132,7 @@ def main(input_folder, output_folder):
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
 
-    for filename in os.listdir(input_folder):
+    for filename in tqdm(os.listdir(input_folder)):
         if filename.endswith(".mp4") or filename.endswith(".avi"):
             input_path = os.path.join(input_folder, filename)
             output_path = os.path.join(output_folder, filename)
