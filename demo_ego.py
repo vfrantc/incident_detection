@@ -95,9 +95,9 @@ def process_video(input_file, output_file, frame_jump=20):
             frames = torch.cat(sliding_window).unsqueeze(0).cuda()
             with torch.no_grad():
                 outputs1 = model1(frames)
-                #outputs2 = model2(frames)
-                # avg_prob = (torch.softmax(outputs1, dim=1)[:, 1] + torch.softmax(outputs2, dim=1)[:, 1]) / 2
-                avg_prob = torch.softmax(outputs1, dim=1)[:, 1]
+                outputs2 = model2(frames)
+                avg_prob = (torch.softmax(outputs1, dim=1)[:, 1] + torch.softmax(outputs2, dim=1)[:, 1]) / 2
+                #avg_prob = torch.softmax(outputs1, dim=1)[:, 1]
                 probabilities.append(avg_prob.cpu().numpy())
 
     cap.release()
