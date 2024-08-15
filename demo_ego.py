@@ -40,7 +40,7 @@ def draw_graph(img, values, current_frame, total_frames, v_position=0.8, graph_h
         points.append((x, y))
 
     for i in range(1, len(points)):
-        color = (0, 0, 255) if values[i] > 0.95 else (0, 255, 0)
+        color = (0, 0, 255) if values[i] >= 0.99 else (0, 255, 0)
         cv2.line(img, points[i - 1], points[i], color, thickness=2)
 
     draw_dashed_line(img, (0, graph_bottom), (img_width, graph_bottom), (0, 255, 255), thickness=2)
@@ -53,7 +53,12 @@ def draw_graph(img, values, current_frame, total_frames, v_position=0.8, graph_h
     cv2.putText(img, '1', (10, graph_top - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
     cv2.putText(img, '0', (10, graph_bottom - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
 
+    # Check if the current frame's value is >= 0.99
+    if values[current_frame] >= 0.99:
+        cv2.putText(img, "Accident", (10, img_height - 30), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255), 3)
+
     return img
+
 
 def process_video(input_file, output_file, frame_jump=20):
     cap = cv2.VideoCapture(input_file)
@@ -97,7 +102,6 @@ def process_video(input_file, output_file, frame_jump=20):
                 outputs1 = model1(frames)
                 outputs2 = model2(frames)
                 avg_prob = (torch.softmax(outputs1, dim=1)[:, 1] + torch.softmax(outputs2, dim=1)[:, 1]) / 2
-                #avg_prob = torch.softmax(outputs1, dim=1)[:, 1]
                 probabilities.append(avg_prob.cpu().numpy())
 
     cap.release()
